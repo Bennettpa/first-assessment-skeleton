@@ -18,8 +18,12 @@ public class ClientHandler implements Runnable {
 
 	private Socket socket;
 
-	public ClientHandler(Socket socket) {
+	private Server server;
+	private PrintWriter writer;
+
+	public ClientHandler(Socket socket, Server server) {
 		super();
+		this.server = server;
 		this.socket = socket;
 	}
 
@@ -28,7 +32,7 @@ public class ClientHandler implements Runnable {
 
 			ObjectMapper mapper = new ObjectMapper();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+			this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
 
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
@@ -37,9 +41,12 @@ public class ClientHandler implements Runnable {
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
+						this.server.addMessage(message);
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
+						this.server.remove(this);
+						this.server.addMessage(message);
 						this.socket.close();
 						break;
 					case "echo":
@@ -47,6 +54,10 @@ public class ClientHandler implements Runnable {
 						String response = mapper.writeValueAsString(message);
 						writer.write(response);
 						writer.flush();
+						break;
+					case "broadcast":
+						log.info("user <{}> broadcast message <{}>", message.getUsername(), message.getContents());
+						this.server.addMessage(message);
 						break;
 				}
 			}
@@ -56,4 +67,14 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	public void sendMessage(Message message) {
+		try{
+			ObjectMapper mapper = new ObjectMapper();
+			String broadcast = mapper.writeValueAsString(message);
+			writer.write(broadcast);
+			writer.flush();
+		} catch (IOException e){
+			log.error("Something went wrong :/", e);
+		}
+	}
 }

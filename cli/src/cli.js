@@ -19,7 +19,7 @@ cli
     let host = args.host | 'localhost'
     let port = args.port | 8080
     server = connect({ host: host, port: port }, () => {
-      server.write(new Message({ username, command: 'connect' }).toJSON() + '\n')
+      server.write(new Message({ username, command: 'connect', contents: username + ' has connected' }).toJSON() + '\n')
       callback()
     })
 
@@ -36,8 +36,8 @@ cli
     const contents = rest.join(' ')
 
     if (command === 'disconnect') {
-      server.end(new Message({ username, command }).toJSON() + '\n')
-    } else if (command === 'echo') {
+      server.end(new Message({ username, command, contents: username + ' has disconnected' }).toJSON() + '\n')
+    } else if (command === 'echo' || command === 'broadcast') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else {
       this.log(`Command <${command}> was not recognized`)
