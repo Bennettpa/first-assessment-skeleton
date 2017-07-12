@@ -1,10 +1,13 @@
 package com.cooksys.assessment.model;
 
+import java.sql.Timestamp;
+
 public class Message {
 
 	private String username;
 	private String command;
 	private String contents;
+	private String timestamp;
 
 	public String getUsername() {
 		return username;
@@ -30,4 +33,17 @@ public class Message {
 		this.contents = contents;
 	}
 
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+	public void addUsername(){ this.contents= this.username +"  "+this.contents;}
+
+	public void setTimestampWithTimeStamp(Timestamp timestamp) {
+		this.timestamp = timestamp.toString();
+	}
+	public void addTimestamp(){ this.contents = this.timestamp + ":  " + this.contents;}
 }

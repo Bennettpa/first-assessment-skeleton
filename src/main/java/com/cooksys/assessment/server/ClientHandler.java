@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Timestamp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,15 +38,20 @@ public class ClientHandler implements Runnable {
 			while (!socket.isClosed()) {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
+				message.setTimestampWithTimeStamp(new Timestamp(System.currentTimeMillis()));
 
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
+						message.addUsername();
+						message.addTimestamp();
 						this.server.addMessage(message);
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
 						this.server.remove(this);
+						message.addUsername();
+						message.addTimestamp();
 						this.server.addMessage(message);
 						this.socket.close();
 						break;
@@ -57,6 +63,8 @@ public class ClientHandler implements Runnable {
 						break;
 					case "broadcast":
 						log.info("user <{}> broadcast message <{}>", message.getUsername(), message.getContents());
+						message.addUsername();
+						message.addTimestamp();
 						this.server.addMessage(message);
 						break;
 				}
