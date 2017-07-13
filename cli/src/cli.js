@@ -30,7 +30,7 @@ cli
         this.log('\x1b[36m' + mes.toString())
       } else if (mes.command === 'echo') {
         this.log('\x1b[35m' + mes.toString())
-      } else if (mes.command === 'whisper') {
+      } else if (mes.command.match(/^@\S*/g)) {
         this.log('\x1b[37m' + mes.toString())
       } else if (mes.command === 'users') {
         this.log('\x1b[34m' + mes.toString())
@@ -53,12 +53,12 @@ cli
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command.match(/^@\S*/g)) {
       lastcommand = command
-      server.write(new Message({ username, command: 'whisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
+      server.write(new Message({ username, command: command, contents: command.replace('@', '') + contents }).toJSON() + '\n')
     } else if (command === 'users') {
       lastcommand = command
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (lastcommand !== ' ') {
-      contents = command + ' ' + contents
+      contents = ' ' + command + ' ' + contents
       command = lastcommand
       if (command === 'disconnect') {
         server.end(new Message({ username, command, contents: ' has disconnected' }).toJSON() + '\n')
@@ -67,7 +67,7 @@ cli
         server.write(new Message({ username, command, contents }).toJSON() + '\n')
       } else if (command.match(/^@\S*/g)) {
         lastcommand = command
-        server.write(new Message({ username, command: 'whisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
+        server.write(new Message({ username, command: command, contents: command.replace('@', '') + contents }).toJSON() + '\n')
       } else if (command === 'users') {
         lastcommand = command
         server.write(new Message({ username, command, contents }).toJSON() + '\n')

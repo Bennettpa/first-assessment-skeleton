@@ -40,7 +40,7 @@ public class ClientHandler implements Runnable {
 				String raw = reader.readLine();
 				Message message = mapper.readValue(raw, Message.class);
 				message.setTimestampWithTimeStamp(new Timestamp(System.currentTimeMillis()));
-
+				log.info(message.getCommand());
 				switch (message.getCommand()) {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
@@ -75,15 +75,15 @@ public class ClientHandler implements Runnable {
 						message.addTimestamp();
 						this.server.addMessage(message);
 						break;
-					case "whisper":
-						String recever = message.getContents().split(" ")[0];
-						message.setContents(message.getContents().replaceFirst(recever+" ",""));
-						log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
-						message.setContents(" (whisper): "+message.getContents());
-						message.addUsername();
-						message.addTimestamp();
-						this.server.directMessage(message,recever);
-						break;
+//					case "@\\S+":
+//						String recever = message.getContents().split(" ")[0];
+//						message.setContents(message.getContents().replaceFirst(recever+" ",""));
+//						log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
+//						message.setContents(" (whisper): "+message.getContents());
+//						message.addUsername();
+//						message.addTimestamp();
+//						this.server.directMessage(message,recever);
+//						break;
 					case "users":
 						log.info("user <{}> users <{}>", message.getUsername(), message.getContents());
 						message.setContents(": currently connected users:");
@@ -93,6 +93,17 @@ public class ClientHandler implements Runnable {
 						writer.write(res);
 						writer.flush();
 						break;
+					default:
+							if(message.getCommand().matches("@\\S+")){
+								String recever = message.getContents().split(" ")[0];
+								message.setContents(message.getContents().replaceFirst(recever+" ",""));
+								log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
+								message.setContents(" (whisper): "+message.getContents());
+								message.addUsername();
+								message.addTimestamp();
+								this.server.directMessage(message,recever);
+								break;
+							}
 				}
 			}
 
