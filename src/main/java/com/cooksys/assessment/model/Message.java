@@ -40,7 +40,7 @@ public class Message {
 	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
-	public void addUsername(){ this.contents = this.username + this.contents;}
+	public void addUsername(){ this.contents = " "+this.username + this.contents;}
 
 	public void setTimestampWithTimeStamp(Timestamp timestamp) {
 		this.timestamp = timestamp.toString();
