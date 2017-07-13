@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,11 +46,12 @@ public class ClientHandler implements Runnable {
 						log.info("user <{}> connected", message.getUsername());
 						message.addUsername();
 						message.addTimestamp();
+						this.server.addClient(this, message.getUsername());
 						this.server.addMessage(message);
 						break;
 					case "disconnect":
 						log.info("user <{}> disconnected", message.getUsername());
-						this.server.remove(this);
+						this.server.remove(this,message.getUsername());
 						message.addUsername();
 						message.addTimestamp();
 						this.server.addMessage(message);
@@ -66,6 +68,23 @@ public class ClientHandler implements Runnable {
 						message.addUsername();
 						message.addTimestamp();
 						this.server.addMessage(message);
+						break;
+					case "wisper":
+						String recever = message.getContents().split(" ")[0];
+						message.setContents(message.getContents().replaceFirst(recever+" ",""));
+						log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
+						message.addUsername();
+						message.addTimestamp();
+						this.server.directMessage(message,recever);
+						break;
+					case "users":
+						log.info("user <{}> users <{}>", message.getUsername(), message.getContents());
+						message.addUsername();
+						message.addTimestamp();
+						message.setContents(message.getContents()+"\n"+String.join("\n", this.server.getClientmap().keySet()));
+						String res = mapper.writeValueAsString(message);
+						writer.write(res);
+						writer.flush();
 						break;
 				}
 			}
@@ -85,4 +104,5 @@ public class ClientHandler implements Runnable {
 			log.error("Something went wrong :/", e);
 		}
 	}
+
 }
