@@ -41,7 +41,7 @@ cli
     } else if (command === 'echo' || command === 'broadcast') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command.match(/^@\S*/g)) {
-      server.write(new Message({ username, command: 'wisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
+      server.write(new Message({ username, command: 'whisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
     } else if (command === 'users') {
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else {

@@ -45,6 +45,7 @@ public class ClientHandler implements Runnable {
 					case "connect":
 						log.info("user <{}> connected", message.getUsername());
 						message.addUsername();
+						message.setContents(": "+message.getContents());
 						message.addTimestamp();
 						this.server.addClient(this, message.getUsername());
 						this.server.addMessage(message);
@@ -53,33 +54,39 @@ public class ClientHandler implements Runnable {
 						log.info("user <{}> disconnected", message.getUsername());
 						this.server.remove(this,message.getUsername());
 						message.addUsername();
+						message.setContents(": "+message.getContents());
 						message.addTimestamp();
 						this.server.addMessage(message);
 						this.socket.close();
 						break;
 					case "echo":
 						log.info("user <{}> echoed message <{}>", message.getUsername(), message.getContents());
+						message.setContents(" (echo): "+message.getContents());
+						message.addUsername();
+						message.addTimestamp();
 						String response = mapper.writeValueAsString(message);
 						writer.write(response);
 						writer.flush();
 						break;
 					case "broadcast":
 						log.info("user <{}> broadcast message <{}>", message.getUsername(), message.getContents());
+						message.setContents(" (all): "+message.getContents());
 						message.addUsername();
 						message.addTimestamp();
 						this.server.addMessage(message);
 						break;
-					case "wisper":
+					case "whisper":
 						String recever = message.getContents().split(" ")[0];
 						message.setContents(message.getContents().replaceFirst(recever+" ",""));
 						log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
+						message.setContents(" (whisper): "+message.getContents());
 						message.addUsername();
 						message.addTimestamp();
 						this.server.directMessage(message,recever);
 						break;
 					case "users":
 						log.info("user <{}> users <{}>", message.getUsername(), message.getContents());
-						message.addUsername();
+						message.setContents(": "+message.getContents());
 						message.addTimestamp();
 						message.setContents(message.getContents()+"\n"+String.join("\n", this.server.getClientmap().keySet()));
 						String res = mapper.writeValueAsString(message);
