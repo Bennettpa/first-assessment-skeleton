@@ -7,6 +7,7 @@ export const cli = vorpal()
 
 let username
 let server
+let lastcommand = ' '
 
 cli
   .delimiter(cli.chalk['yellow']('ftd~$'))
@@ -25,7 +26,17 @@ cli
 
     server.on('data', (buffer) => {
       let mes = Message.fromJSON(buffer)
-      this.log(mes.toString())
+      if (mes.command === 'broadcast') {
+        this.log('\x1b[36m' + mes.toString())
+      } else if (mes.command === 'echo') {
+        this.log('\x1b[35m' + mes.toString())
+      } else if (mes.command === 'whisper') {
+        this.log('\x1b[37m' + mes.toString())
+      } else if (mes.command === 'users') {
+        this.log('\x1b[34m' + mes.toString())
+      } else {
+        this.log('\x1b[31m' + mes.toString())
+      }
     })
 
     server.on('end', () => {
@@ -33,19 +44,36 @@ cli
     })
   })
   .action(function (input, callback) {
-    const [ command, ...rest ] = words(input, /\S*/g)
-    const contents = rest.join(' ')
-
+    let [ command, ...rest ] = words(input, /\S*/g)
+    let contents = rest.join(' ')
     if (command === 'disconnect') {
       server.end(new Message({ username, command, contents: ' has disconnected' }).toJSON() + '\n')
     } else if (command === 'echo' || command === 'broadcast') {
+      lastcommand = command
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
     } else if (command.match(/^@\S*/g)) {
+      lastcommand = command
       server.write(new Message({ username, command: 'whisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
     } else if (command === 'users') {
+      lastcommand = command
       server.write(new Message({ username, command, contents }).toJSON() + '\n')
+    } else if (lastcommand !== ' ') {
+      contents = command + ' ' + contents
+      command = lastcommand
+      if (command === 'disconnect') {
+        server.end(new Message({ username, command, contents: ' has disconnected' }).toJSON() + '\n')
+      } else if (command === 'echo' || command === 'broadcast') {
+        lastcommand = command
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      } else if (command.match(/^@\S*/g)) {
+        lastcommand = command
+        server.write(new Message({ username, command: 'whisper', contents: command.replace('@', '') + contents }).toJSON() + '\n')
+      } else if (command === 'users') {
+        lastcommand = command
+        server.write(new Message({ username, command, contents }).toJSON() + '\n')
+      }
     } else {
-      this.log(`Command <${command}> was not recognized`)
+      this.log(`Command <${command}> was not recognized. A command is required`)
     }
 
     callback()
