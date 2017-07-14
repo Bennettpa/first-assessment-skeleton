@@ -7,8 +7,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +27,9 @@ public class ClientHandler implements Runnable {
 		this.socket = socket;
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Runnable#run()
+	 */
 	public void run() {
 		try {
 
@@ -75,15 +76,6 @@ public class ClientHandler implements Runnable {
 						message.addTimestamp();
 						this.server.addMessage(message);
 						break;
-//					case "@\\S+":
-//						String recever = message.getContents().split(" ")[0];
-//						message.setContents(message.getContents().replaceFirst(recever+" ",""));
-//						log.info("user <{}> direct message  to <{}>: ", message.getUsername(), recever,message.getContents());
-//						message.setContents(" (whisper): "+message.getContents());
-//						message.addUsername();
-//						message.addTimestamp();
-//						this.server.directMessage(message,recever);
-//						break;
 					case "users":
 						log.info("user <{}> users <{}>", message.getUsername(), message.getContents());
 						message.setContents(": currently connected users:");
@@ -112,6 +104,9 @@ public class ClientHandler implements Runnable {
 		}
 	}
 
+	/**
+	 * @param message
+	 */
 	public void sendMessage(Message message) {
 		try{
 			ObjectMapper mapper = new ObjectMapper();

@@ -26,6 +26,7 @@ cli
 
     server.on('data', (buffer) => {
       let mes = Message.fromJSON(buffer)
+      // Changes the color for the mes depending on the command
       if (mes.command === 'broadcast') {
         this.log('\x1b[36m' + mes.toString())
       } else if (mes.command === 'echo') {
@@ -44,8 +45,9 @@ cli
     })
   })
   .action(function (input, callback) {
-    let [ command, ...rest ] = words(input, /\S*/g)
+    let [ command, ...rest ] = words(input, /\S*/g) // spreates the command form the rest of the input
     let contents = rest.join(' ')
+    if (input === '') this.log(`A command is required`)
     if (command === 'disconnect') {
       server.end(new Message({ username, command, contents: ' has disconnected' }).toJSON() + '\n')
     } else if (command === 'echo' || command === 'broadcast') {
